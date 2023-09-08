@@ -1,0 +1,13 @@
+- name: Obtaining a list of plugins
+  community.general.jenkins_script:
+    url: https://jenkins.k3s.stiil.dk/
+    script: 'println(Jenkins.instance.pluginManager.plugins)'
+    user: testuser
+    password: K4xRogM2N7ELfXPy6YG5DbXt82nXhWwATAb2BqJG
+    validate_certs: false
+  register: result
+
+- name: Print return information from the previous task
+  ansible.builtin.debug:
+    var: result
+    verbosity: 0

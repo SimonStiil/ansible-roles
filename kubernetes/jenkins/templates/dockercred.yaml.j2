@@ -1,0 +1,9 @@
+apiVersion: v1
+data:
+stringData:
+  .dockerconfigjson: '{{ jenkins_dockercred }}'
+kind: Secret
+metadata:
+  name: dockercred
+  namespace: jenkins
+type: kubernetes.io/dockerconfigjson

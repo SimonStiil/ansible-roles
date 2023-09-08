@@ -1,0 +1,4 @@
+---
+base_password: 'SOMEsecretPASSWORDtoUSEforADMINbootstap'
+rancher_hostname: rancher.svc.local
+certificate_issuer_name: cert_manager_isser_name

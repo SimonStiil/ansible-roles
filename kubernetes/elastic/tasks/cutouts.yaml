@@ -1,0 +1,24 @@
+    
+- name: "wait for elastic to come online"
+  ansible.builtin.uri:
+    url: "https://{{ rancher_hostname }}/ping"
+    status_code: 200
+    validate_certs: false
+  register: result
+  until: result.status == 200
+  retries: 60
+  delay: 5
+
+- name: Deploy latest version of kibana chart inside elastic namespace
+  kubernetes.core.helm:
+    name: kibana
+    chart_ref: elastic/kibana
+    release_namespace: elastic
+    values: "{{ lookup('template', 'kibana-values.yaml.j2') | from_yaml }}"
+
+- name: Deploy latest version of apm-server chart inside elastic namespace
+  kubernetes.core.helm:
+    name: apm-server
+    chart_ref: elastic/apm-server
+    release_namespace: elastic
+    values: "{{ lookup('template', 'apm-values.yaml.j2') | from_yaml }}"

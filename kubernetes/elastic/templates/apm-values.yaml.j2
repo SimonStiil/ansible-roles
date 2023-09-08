@@ -1,0 +1,55 @@
+---
+#https://github.com/elastic/helm-charts/blob/main/apm-server/values.yaml
+apmConfig:
+  apm-server.yml: |
+    apm-server:
+      host: "0.0.0.0:8200"
+      kibana:
+        enabled: true
+        host: "https://kibana-kibana:5601"
+        
+        username: '${ELASTICSEARCH_USERNAME}'
+        password: '${ELASTICSEARCH_PASSWORD}'
+        ssl:
+          enabled: true
+          certificate_authorities: 
+          - /usr/share/apm-server/config/certs/ca.crt
+    queue: {}
+    output.elasticsearch:
+      username: '${ELASTICSEARCH_USERNAME}'
+      password: '${ELASTICSEARCH_PASSWORD}'
+      protocol: https
+      hosts: ["elasticsearch-master:9200"]
+      ssl.certificate_authorities:
+      - /usr/share/apm-server/config/certs/ca.crt
+
+extraEnvs:
+  - name: "ELASTICSEARCH_USERNAME"
+    value: elastic
+  - name: "ELASTICSEARCH_PASSWORD"
+    valueFrom:
+      secretKeyRef:
+        name: elasticsearch-master-credentials
+        key: password
+
+hostAliases: 
+- ip: "127.0.0.1"
+  hostnames:
+  - "{{ apm_hostname }}"
+
+
+ingress:
+  enabled: true
+  className: null
+  pathtype: ImplementationSpecific
+  annotations: 
+    kubernetes.io/ingress.class: traefik
+    traefik.ingress.kubernetes.io/router.tls: "true"
+  path: /
+  hosts:
+    - {{ apm_hostname }}
+
+secretMounts:
+  - name: elasticsearch-master-certs
+    secretName: elasticsearch-master-certs
+    path: /usr/share/apm-server/config/certs
