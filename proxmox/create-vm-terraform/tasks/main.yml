@@ -1,0 +1,22 @@
+---
+- name: Create role_dir directory
+  file:
+    path: "{{ proxmox_terraform_role_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: 0700
+    recurse: yes
+
+- name: Create main.tf
+  ansible.builtin.template:
+    src: main.tf.j2
+    dest: "{{ proxmox_terraform_role_dir }}/main.tf"
+    owner: root
+    group: root
+    mode: '0600'
+    
+- name: Basic deploy of a service
+  community.general.terraform:
+    project_path: "{{ proxmox_terraform_role_dir }}"
+    state: planned

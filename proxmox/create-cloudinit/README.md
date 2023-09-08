@@ -31,8 +31,10 @@ None.
 ## Example Playbook
 
     - hosts: pve
+      gather_facts: yes
+      become: yes
       roles:
-        - role: proxmox/create-cloudinit
+        - role: stiil-ansible-roles/proxmox/create-cloudinit
 
 ## License
 

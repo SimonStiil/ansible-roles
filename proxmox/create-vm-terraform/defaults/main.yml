@@ -1,0 +1,12 @@
+---
+proxmox_terraform_role_dir: /var/proxmox/terraform
+proxmox_terraform_provider_version: 2.9.11
+proxmox_cloud_image_source: ubuntu-23.04-20230829 # Latest image at time of submission
+proxmox_vm_disk_location: local-lvm
+proxmox_vm_disk_size: 128G
+proxmox_vm_cpu_count: 8
+proxmox_vm_memory_size: 8192
+proxmox_vm_boot_order: 1
+proxmox_vm_onboot: true
+proxmox_vm_bridge: vmbr0
+proxmox_vm_ssh_user: root
