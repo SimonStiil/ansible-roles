@@ -37,7 +37,7 @@
     
 - name: Attach EFIdisk to VM 
   command: >-
-    qm set {{ pve_vm_id }} --efidisk0 {{ image_destination }},efitype=4m,pre-enrolled-keys=1,size=4M
+    qm set {{ pve_vm_id }} --efidisk0 {{ image_destination }}:0,efitype=4m,pre-enrolled-keys=1,size=4M
   when: proxmox_vm_bios == "ovmf"
 
 - name: Set Boot Drive
