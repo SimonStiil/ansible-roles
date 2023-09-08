@@ -10,7 +10,7 @@
 
 - name: Create New VM for Templating
   command: >-
-    qm create {{ pve_vm_id }} --memory 2048 --net0 virtio,bridge=vmbr0 --name ubuntu-{{ ubuntu_version }}-{{ release_date }}
+    qm create {{ pve_vm_id }} --memory {{ proxmox_vm_memory }} --net0 virtio,bridge={{ proxmox_vm_bridge }} --name ubuntu-{{ ubuntu_version }}-{{ release_date }} --bios={{ proxmox_vm_bios }}
   args:
     creates: /etc/pve/local/qemu-server/{{ pve_vm_id }}.conf
 
@@ -34,6 +34,11 @@
 - name: Attach CloudInit CDROM to VM 
   command: >-
     qm set {{ pve_vm_id }} --ide2 {{ image_destination }}:cloudinit
+    
+- name: Attach EFIdisk to VM 
+  command: >-
+    qm set {{ pve_vm_id }} --efidisk0 {{ image_destination }},efitype=4m,pre-enrolled-keys=1,size=4M
+  when: proxmox_vm_bios == "ovmf"
 
 - name: Set Boot Drive
   command: >-
