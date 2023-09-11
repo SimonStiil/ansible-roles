@@ -1,0 +1,4 @@
+---
+flux_install_script: "https://fluxcd.io/install.sh"
+
+flux_bin_path: /usr/local/bin/flux

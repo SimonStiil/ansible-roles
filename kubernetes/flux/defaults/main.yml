@@ -1,0 +1,6 @@
+---
+github_organization: myORG
+github_flux_repository: myFluxRepo
+github_flux_base: flux-base
+github_private: false 
+github_personal: true 

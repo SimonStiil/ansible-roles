@@ -15,8 +15,41 @@
     owner: root
     group: root
     mode: '0600'
-    
-- name: Basic deploy of a service
+- name: Terraform Plan
   community.general.terraform:
     project_path: "{{ proxmox_terraform_role_dir }}"
+    plan_file: "{{ proxmox_terraform_role_dir }}/tfplan"
+    force_init: true
     state: planned
+  environment:
+    PM_USER: "{{ proxmox_terraform_user }}"
+    PM_PASS: "{{ proxmox_terraform_password }}"
+- name: Parse Plan
+  ansible.builtin.command: 
+    chdir: "{{ proxmox_terraform_role_dir }}"
+    cmd: "terraform show -no-color -json tfplan| jq -M .resource_changes[0].change > change"
+- name: Store changes before
+  ansible.builtin.command: 
+    chdir: "{{ proxmox_terraform_role_dir }}"
+    cmd: "jq -M .before change > change.before"
+- name: Store changes after
+  ansible.builtin.command: 
+    chdir: "{{ proxmox_terraform_role_dir }}"
+    cmd: "jq -M .after change > change.after"
+- name: Parse Plan
+  ansible.builtin.command: 
+    chdir: "{{ proxmox_terraform_role_dir }}"
+    cmd: "jd change.before change.after"
+  register: plandiff
+- name: Print Plan
+  debug: 
+    var: plandiff.stdout
+- name: Terraform apply
+  community.general.terraform:
+    project_path: "{{ proxmox_terraform_role_dir }}"
+    plan_file: "{{ proxmox_terraform_role_dir }}/tfplan"
+    force_init: true
+    state: present
+  environment:
+    PM_USER: "{{ proxmox_terraform_user }}"
+    PM_PASS: "{{ proxmox_terraform_password }}"

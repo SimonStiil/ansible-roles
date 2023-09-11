@@ -1,0 +1,33 @@
+---
+- name: Get an existing Service object
+  kubernetes.core.k8s_info:
+    api_version: kustomize.toolkit.fluxcd.io/v1
+    kind: Kustomization
+    name: flux-system
+    namespace: flux-system
+  register: flux_system_kustomize
+  
+- name: Print return information from the previous task
+  ansible.builtin.debug:
+    var: flux_system_kustomize
+    verbosity: 2
+    
+- name: Get an existing Service object
+  kubernetes.core.k8s_info:
+    api_version: source.toolkit.fluxcd.io/v1
+    kind: GitRepository
+    name: flux-system
+    namespace: flux-system
+  register: flux_system_gitrepository
+
+- name: flux bootstrap
+  ansible.builtin.shell:
+    cmd: flux bootstrap github --reconcile --owner={{ github_organization }} --repository={{ github_flux_repository }} --private={{ github_private }} --personal={{ github_personal }} --path={{ github_flux_base }}
+  register: flux_bootstrap
+  environment:
+    GITHUB_TOKEN: "{{ github_token_flux }}"
+  when: >
+    (not flux_system_kustomize.api_found or
+    not flux_system_kustomize.resources) and
+    (not flux_system_gitrepository.api_found or
+    not flux_system_gitrepository.resources)

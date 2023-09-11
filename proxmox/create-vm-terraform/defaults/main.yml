@@ -7,6 +7,7 @@ proxmox_vm_disk_size: 128G
 proxmox_vm_cpu_count: 8
 proxmox_vm_memory_size: 8192
 proxmox_vm_boot_order: 1
-proxmox_vm_onboot: true
+proxmox_vm_onboot: "true"
 proxmox_vm_bridge: vmbr0
+proxmox_vm_bios: ovmf
 proxmox_vm_ssh_user: root

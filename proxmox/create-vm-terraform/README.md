@@ -5,9 +5,12 @@ This role creates a vm in proxmox based on a vm template
 ## Requirements
 
 Installation of Proxmox 8.0
-User on PAM user on Proxmox with permissions from 
-pveum role add \[USERNAME\] -privs "Datastore.AllocateSpace Datastore.Audit Pool.Allocate Sys.Audit Sys.Console Sys.Modify VM.Allocate VM.Audit VM.Clone VM.Config.CDROM VM.Config.Cloudinit VM.Config.CPU VM.Config.Disk VM.Config.HWType VM.Config.Memory VM.Config.Network VM.Config.Options VM.Migrate VM.Monitor VM.PowerMgmt"
-See https://registry.terraform.io/providers/Telmate/proxmox/latest/docs for updated permission list
+
+User able to login to Proxmox and sudo to root
+
+Terraform user with password, follow this guide 
+See https://registry.terraform.io/providers/Telmate/proxmox/latest/docs 
+
 
 ## Role Variables
 
@@ -15,6 +18,8 @@ Available variables are listed below, along with default values (see `defaults/m
 
   proxmox_terraform_role_dir: /var/proxmox/terraform # Path of Terraform workdir  
   proxmox_terraform_provider_version: 2.9.14         # Version of provider Telmate/proxmox to use  
+  proxmox_terraform_user: terraform-prov@pve         # Username for terraform provider  
+  proxmox_terraform_password: token                  # Password/Token for terraform provider  
   proxmox_vm_hostname: MyVM                          # Hostname of the new VM
   proxmox_cloud_image_source: ubuntu-23.04-20230829  # Name of template to use  
   proxmox_vm_disk_location: local-lvm                # Storage location of vm-images

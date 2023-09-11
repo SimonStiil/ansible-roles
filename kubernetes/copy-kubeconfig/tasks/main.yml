@@ -1,0 +1,16 @@
+---
+
+- name: Create directory .kube
+  file:
+    path: /root/.kube
+    state: directory
+    owner: root
+    mode: "u=rwx,g=rx,o="
+
+- name: Copy config file to user home directory
+  copy:
+    src: /etc/rancher/k3s/k3s.yaml
+    dest: /root/.kube/config
+    remote_src: yes
+    owner: root
+    mode: "u=rw,g=,o="

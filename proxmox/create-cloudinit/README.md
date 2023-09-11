@@ -19,7 +19,7 @@ Available variables are listed below, along with default values (see `defaults/m
   image_destination: local-lvm        # Default storage for default one node  
   image_folder: /var/cloud-images/    # Storage location for downloaded images  
   proxmox_vm_bridge: vmbr0            # Network bridge id  
-  proxmox_vm_memory: 2048             # Template default Memory (Can be changed when creating a VM  
+  proxmox_vm_template_memory: 2048             # Template default Memory (Can be changed when creating a VM  
   proxmox_vm_bios: ovmf               # Template default Bios  
 
 Only one template should exists for an ID if you already have a template on ID 9000 change it

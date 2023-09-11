@@ -1,0 +1,6 @@
+---
+- name: Install unzip
+  ansible.builtin.apt:
+    pkg:
+    - unzip
+    update_cache: yes

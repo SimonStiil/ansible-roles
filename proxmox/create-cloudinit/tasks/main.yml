@@ -10,7 +10,7 @@
 
 - name: Create New VM for Templating
   command: >-
-    qm create {{ pve_vm_id }} --memory {{ proxmox_vm_memory }} --net0 virtio,bridge={{ proxmox_vm_bridge }} --name ubuntu-{{ ubuntu_version }}-{{ release_date }} --bios={{ proxmox_vm_bios }}
+    qm create {{ pve_vm_id }} --memory {{ proxmox_vm_template_memory }} --net0 virtio,bridge={{ proxmox_vm_bridge }} --name ubuntu-{{ ubuntu_version }}-{{ release_date }} --bios={{ proxmox_vm_bios }}
   args:
     creates: /etc/pve/local/qemu-server/{{ pve_vm_id }}.conf
 

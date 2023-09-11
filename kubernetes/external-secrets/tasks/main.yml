@@ -1,0 +1,20 @@
+---
+- name: Create a external-secrets namespace
+  kubernetes.core.k8s:
+    name: external-secrets
+    api_version: v1
+    kind: Namespace
+    state: present
+    
+- name: Add webhook-credentials to external-secrets
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: Secret
+      metadata:
+        name: webhook-credentials
+        namespace: external-secrets
+      stringData:
+        username: "{{ external_secrets_user }}"
+        password: "{{ external_secrets_pass }}"

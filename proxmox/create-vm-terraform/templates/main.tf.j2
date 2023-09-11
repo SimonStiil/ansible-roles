@@ -6,22 +6,29 @@ terraform {
     }
   }
 }
+
+provider "proxmox" {
+  pm_api_url = "https://localhost:8006/api2/json"
+}
+
 resource "proxmox_vm_qemu" "generate_vm" {
-  name        = {{ proxmox_vm_hostname }}
+  name        = "{{ proxmox_vm_hostname }}"
   desc        = "tf description"
   target_node = "pve"
 
-  clone = {{ proxmox_cloud_image_source }}
+  clone = "{{ proxmox_cloud_image_source }}"
 
   disk{
     type = "scsi"
-    storage = {{ proxmox_vm_disk_location }}
-	size = {{ proxmox_vm_disk_size }}
+    storage = "{{ proxmox_vm_disk_location }}"
+    size = "{{ proxmox_vm_disk_size }}"
   }
   
   cores   = {{ proxmox_vm_cpu_count }}
   sockets = 1
   memory  = {{ proxmox_vm_memory_size }}
+  
+  bios = "{{ proxmox_vm_bios }}"
 
   onboot = {{ proxmox_vm_onboot }}
   startup = "order={{ proxmox_vm_boot_order }}"
@@ -36,12 +43,12 @@ resource "proxmox_vm_qemu" "generate_vm" {
   os_type      = "cloud-init"
   ipconfig0    = "ip={{ proxmox_vm_ip }}/{{ proxmox_vm_cidr }},gw={{ proxmox_vm_gateway }}"
   nameserver   = "{{ proxmox_vm_nameserver }}"
-{-% if proxmox_vm_searchdomain is defined %}
+{% if proxmox_vm_searchdomain is defined %}
   searchdomain = "{{ proxmox_vm_searchdomain }}"
 {% endif %}
   sshkeys = <<EOF
-{%- for line in proxmox_vm_sshkeys %}
-{{ line -}}
+{% for line in proxmox_vm_sshkeys %}
+{{ line }}
 {% endfor %}
 EOF
 }

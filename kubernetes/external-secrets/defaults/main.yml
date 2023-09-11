@@ -1,0 +1,3 @@
+---
+external_secrets_user: myUser
+external_secrets_pass: somePasswordForSecrets

@@ -88,7 +88,7 @@
 - name: Reload service systemd-resolved, in all cases
   ansible.builtin.systemd:
     name: systemd-resolved.service
-    state: reloaded
+    state: restarted
 
 - name: Creating fake resolv.conf for cluster
   copy:
