@@ -24,6 +24,7 @@
   environment:
     PM_USER: "{{ proxmox_terraform_user }}"
     PM_PASS: "{{ proxmox_terraform_password }}"
+## This area is WORK in progress and will not work in the current form as command does not suport pipes ###
 - name: Parse Plan
   ansible.builtin.command: 
     chdir: "{{ proxmox_terraform_role_dir }}"
@@ -36,6 +37,7 @@
   ansible.builtin.command: 
     chdir: "{{ proxmox_terraform_role_dir }}"
     cmd: "jq -M .after change > change.after"
+## END WIP ##
 - name: Parse Plan
   ansible.builtin.command: 
     chdir: "{{ proxmox_terraform_role_dir }}"
