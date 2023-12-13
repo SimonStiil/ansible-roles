@@ -1,4 +1,4 @@
-# Ansible Role: proxmix/create-vm-terraform
+# Ansible Role: proxmox/create-vm-terraform
 
 This role creates a vm in proxmox based on a vm template
 

@@ -1,0 +1,5 @@
+---
+terraform_username: terraform-prov   # Username to create
+terraform_password: supersecret      # See https://docs.ansible.com/ansible/latest/reference_appendices/faq.html#how-do-i-generate-encrypted-passwords-for-the-user-module
+terraform_comment: Terraform User    # Description
+terraform_role: TerraformProv        # Create role with this name and set default terraform required permissions

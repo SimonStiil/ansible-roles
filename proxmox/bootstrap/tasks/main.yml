@@ -1,0 +1,46 @@
+---
+- name: Create disabled sources directory
+  file:
+    path: "/etc/apt/sources.list.d-disabled/"
+    state: directory
+    owner: root
+    group: root
+    mode: 0775
+    recurse: yes
+- name: pve-enterprise File Stat
+  stat:
+    path: /etc/apt/sources.list.d/pve-enterprise.list
+  register: pve_enterprise
+- name: Copy files from foo to bar
+  copy: 
+    src: "/etc/apt/sources.list.d/pve-enterprise.list"
+    dest: "/etc/apt/sources.list.d-disabled/pve-enterprise.list"
+    remote_src: true 
+  when: pve_enterprise.stat.exists
+- name: Remove old files foo
+  file: 
+    path: "/etc/apt/sources.list.d/pve-enterprise.list" 
+    state: absent
+  when: pve_enterprise.stat.exists
+  
+- name: ceph File Stat
+  stat:
+    path: /etc/apt/sources.list.d/ceph.list
+  register: ceph
+- name: Copy files from foo to bar
+  copy: 
+    src: "/etc/apt/sources.list.d/ceph.list"
+    dest: "/etc/apt/sources.list.d-disabled/ceph.list"
+    remote_src: true 
+  when: ceph.stat.exists
+- name: Remove old files foo
+  file: 
+    path: "/etc/apt/sources.list.d/ceph.list" 
+    state: absent
+  when: ceph.stat.exists
+  
+- name: Install sudo
+  ansible.builtin.apt:
+    pkg:
+    - sudo
+    update_cache: yes

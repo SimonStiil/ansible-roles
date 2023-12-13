@@ -1,0 +1,5 @@
+---
+personal_username: simon            # Username to create
+personal_password: supersecret      # See https://docs.ansible.com/ansible/latest/reference_appendices/faq.html#how-do-i-generate-encrypted-passwords-for-the-user-module
+personal_comment: Simon Stiil       # Description
+personal_role: Administrator        # Role for your new personal user

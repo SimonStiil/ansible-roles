@@ -1,0 +1,45 @@
+---
+- name: "Add pam user '{{ terraform_username }}'"
+  ansible.builtin.user:
+    name: "{{ terraform_username }}"
+    comment: "{{ terraform_comment }}"
+    shell: /bin/bash
+    password: "{{ terraform_password }}"
+- name: "Set authorized key for {{ terraform_username }}"
+  authorized_key:
+    user: {{ terraform_username }}
+    state: present
+    key: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
+- name: "Find {{ terraform_username }} in sudoers"
+  lineinfile: 
+    dest: /etc/sudoers
+    line: "{{ terraform_username }} ALL=(ALL) NOPASSWD:ALL"
+  check_mode: yes
+  register: terraform_presence
+- name: "Add {{ terraform_username }} to sudoers file"
+  lineinfile:
+    dest: "/etc/sudoers"
+    insertafter: '^root'
+    line: "{{ terraform_username }} ALL=(ALL) NOPASSWD:ALL"
+  when: terraform_presence.changed
+  
+- name: "Create Proxmox Role {{ terraform_role }}"
+  command: >-
+    pveum role add {{ terraform_role }} -privs "Datastore.AllocateSpace Datastore.Audit Pool.Allocate SDN.Use Sys.Audit Sys.Console Sys.Modify VM.Allocate VM.Audit VM.Clone VM.Config.CDROM VM.Config.Cloudinit VM.Config.CPU VM.Config.Disk VM.Config.HWType VM.Config.Memory VM.Config.Network VM.Config.Options VM.Migrate VM.Monitor VM.PowerMgmt"
+  register: command_result
+  ignore_errors: true
+- name: "Create Proxmox Role {{ terraform_role }}"
+  command: >-
+    pveum role modify {{ terraform_role }} -privs "Datastore.AllocateSpace Datastore.Audit Pool.Allocate SDN.Use Sys.Audit Sys.Console Sys.Modify VM.Allocate VM.Audit VM.Clone VM.Config.CDROM VM.Config.Cloudinit VM.Config.CPU VM.Config.Disk VM.Config.HWType VM.Config.Memory VM.Config.Network VM.Config.Options VM.Migrate VM.Monitor VM.PowerMgmt"
+  when: command_result.rc == 255 and "'already exists' in command_result.stderr"
+
+- name: "Create Proxmox User {{ terraform_username }}"
+  command: >-
+    pveum user add {{ terraform_username }}@pam
+  ignore_errors: true  
+  register: command_result
+  failed_when: command_result.stderr and "'already exists' not in command_result.stderr"
+  
+- name: "Create ACL {{ terraform_username }} "
+  command: >-
+    pveum aclmod / -user {{ terraform_username }}@pam -role {{ terraform_role }}

@@ -1,4 +1,4 @@
-# Ansible Role: proxmox/create-cloudinit
+# Ansible Role: proxmix/create-cloudinit
 
 This role create a cloud-init template image in proxmox 8.0
 
