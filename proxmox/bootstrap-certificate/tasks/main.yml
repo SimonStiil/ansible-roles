@@ -1,0 +1,24 @@
+---
+- name: Create certificate files if not existing
+  command: 
+    cmd: >-
+      touch {{ certificate_path }}{{ certificate_cert_name }} {{ certificate_path }}{{ certificate_key_name }}
+    creates: "{{ certificate_path }}{{ certificate_cert_name }}" 
+- name: "Copy certificate files"
+  copy:
+    dest: "{{ certificate_path }}{{ certificate_cert_name }}"
+    content: |
+             {{ certificate_content }}
+             {{ certificate_intermediate_content }}
+             {{ certificate_root_content }}
+  when: certificate_content is defined and certificate_key_content is defined
+- name: "Copy key file"
+  copy:
+    dest: "{{ certificate_path }}{{ certificate_key_name }}"
+    content: |
+             {{ certificate_key_content }}
+  when: certificate_content is defined and certificate_key_content is defined
+- name: "Restart pveproxy service"
+  ansible.builtin.service:
+    name: pveproxy
+    state: restarted

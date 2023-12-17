@@ -1,7 +1,7 @@
 ---
 - name: Create disabled sources directory
   file:
-    path: "/etc/apt/sources.list.d-disabled/"
+    path: "{{ apt_disabled_dir }}"
     state: directory
     owner: root
     group: root
@@ -14,7 +14,7 @@
 - name: Copy files from foo to bar
   copy: 
     src: "/etc/apt/sources.list.d/pve-enterprise.list"
-    dest: "/etc/apt/sources.list.d-disabled/pve-enterprise.list"
+    dest: "{{ apt_disabled_dir }}/pve-enterprise.list"
     remote_src: true 
   when: pve_enterprise.stat.exists
 - name: Remove old files foo
@@ -30,7 +30,7 @@
 - name: Copy files from foo to bar
   copy: 
     src: "/etc/apt/sources.list.d/ceph.list"
-    dest: "/etc/apt/sources.list.d-disabled/ceph.list"
+    dest: "{{ apt_disabled_dir }}/ceph.list"
     remote_src: true 
   when: ceph.stat.exists
 - name: Remove old files foo

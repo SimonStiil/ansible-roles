@@ -7,7 +7,7 @@
     password: "{{ personal_password }}"
 - name: "Set authorized key for {{ personal_username }}"
   authorized_key:
-    user: {{ personal_username }}
+    user: "{{ personal_username }}"
     state: present
     key: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
 - name: "Find {{ personal_username }} in sudoers"
@@ -22,7 +22,7 @@
     insertafter: '^root'
     line: "{{ personal_username }} ALL=(ALL) NOPASSWD:ALL"
   when: personal_presence.changed
-- name: "Create Proxmox User {{ personal_username }}"
+- name: "Create Proxmox User {{ personal_username }}, ignore if already existing"
   command: >-
     pveum user add {{ personal_username }}@pam
   ignore_errors: true  

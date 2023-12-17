@@ -1,0 +1,10 @@
+---
+- name: "Test if NFS Storage for '{{ nfs_content }}' already existing, ignore_errors"
+  command: >-
+    pvesm list nfs
+  register: command_result
+  ignore_errors: true
+- name: "Create Proxmox NFS storage for '{{ nfs_content }}'"
+  command: >-
+    pvesm add nfs nfs --path {{ nfs_path }} --server {{ nfs_server }} --export {{ nfs_export }} --content {{ nfs_content }}
+  when: command_result.rc == 255 and "'does not exist' in command_result.stderr"

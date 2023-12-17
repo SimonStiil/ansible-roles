@@ -1,0 +1,4 @@
+---
+certificate_path: /etc/pve/local/       # Default path for proxmox certificates
+certificate_cert_name: pveproxy-ssl.pem # Default name for pveproxy public certificate 
+certificate_key_name: pveproxy-ssl.key  # Default name for pveproxy private key

@@ -7,7 +7,7 @@
     password: "{{ terraform_password }}"
 - name: "Set authorized key for {{ terraform_username }}"
   authorized_key:
-    user: {{ terraform_username }}
+    user: "{{ terraform_username }}"
     state: present
     key: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
 - name: "Find {{ terraform_username }} in sudoers"
@@ -23,17 +23,17 @@
     line: "{{ terraform_username }} ALL=(ALL) NOPASSWD:ALL"
   when: terraform_presence.changed
   
-- name: "Create Proxmox Role {{ terraform_role }}"
+- name: "Create Proxmox Role {{ terraform_role }}, ignore if already existing"
   command: >-
     pveum role add {{ terraform_role }} -privs "Datastore.AllocateSpace Datastore.Audit Pool.Allocate SDN.Use Sys.Audit Sys.Console Sys.Modify VM.Allocate VM.Audit VM.Clone VM.Config.CDROM VM.Config.Cloudinit VM.Config.CPU VM.Config.Disk VM.Config.HWType VM.Config.Memory VM.Config.Network VM.Config.Options VM.Migrate VM.Monitor VM.PowerMgmt"
   register: command_result
   ignore_errors: true
-- name: "Create Proxmox Role {{ terraform_role }}"
+- name: "Modify Proxmox Role {{ terraform_role }}, if already existing"
   command: >-
     pveum role modify {{ terraform_role }} -privs "Datastore.AllocateSpace Datastore.Audit Pool.Allocate SDN.Use Sys.Audit Sys.Console Sys.Modify VM.Allocate VM.Audit VM.Clone VM.Config.CDROM VM.Config.Cloudinit VM.Config.CPU VM.Config.Disk VM.Config.HWType VM.Config.Memory VM.Config.Network VM.Config.Options VM.Migrate VM.Monitor VM.PowerMgmt"
   when: command_result.rc == 255 and "'already exists' in command_result.stderr"
 
-- name: "Create Proxmox User {{ terraform_username }}"
+- name: "Create Proxmox User {{ terraform_username }}, ignore if already existing"
   command: >-
     pveum user add {{ terraform_username }}@pam
   ignore_errors: true  
