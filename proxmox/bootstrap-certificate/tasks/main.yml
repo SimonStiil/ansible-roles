@@ -4,6 +4,7 @@
     cmd: >-
       touch {{ certificate_path }}{{ certificate_cert_name }} {{ certificate_path }}{{ certificate_key_name }}
     creates: "{{ certificate_path }}{{ certificate_cert_name }}" 
+  when: certificate_content is defined and certificate_key_content is defined
 - name: "Copy certificate files"
   copy:
     dest: "{{ certificate_path }}{{ certificate_cert_name }}"

@@ -1,6 +1,2 @@
 ---
 apt_disabled_dir: /etc/apt/sources.list.d-disabled/ # where to move disabled apt lists
-nfs_path: /mnt/nfs                  # local path for mount
-nfs_server: diskstation.stiil.home  # Server name or ip
-nfs_export: /volume2/proxmox-nfs    # Location of export on server
-nfs_content: backup                 # Storage options https://pve.proxmox.com/wiki/Storage
