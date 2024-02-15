@@ -1,8 +1,13 @@
 ---
-- name: Install pip and pyhon-kubernetes packages
+- name: Install pip packages
   ansible.builtin.apt:
     pkg:
-    - python3-kubernetes
-    - python3-openshift
     - python3-pip
     update_cache: yes
+- name: Install kubernetes and openshift packages
+  ansible.builtin.pip:
+    name:
+    - kubernetes
+    - openshift
+    executable: pip3
+    
