@@ -1,0 +1,36 @@
+---
+
+- name: Install nfs server packages
+  ansible.builtin.apt:
+    pkg:
+    - nfs-server
+    cache_valid_time: 3600
+  register: nfs_server_install
+  
+- name: Copy exports file
+  template:
+    src: "exports.j2"
+    dest: "/etc/exports"
+    owner: root
+    group: root
+    mode: 0755
+  register: nfs_exports
+    
+- name: Rerun exports
+  command: >-
+    exportfs -ar
+  when: nfs_exports is changed
+  changed_when: true
+
+- name: Enable service nfs-server
+  ansible.builtin.service:
+    name: nfs-server
+    enabled: yes
+  when: nfs_server_install is changed
+  register: nfs_server_enabled
+
+- name: Start service nfs-server
+  ansible.builtin.service:
+    name: nfs-server
+    state: started
+  when: nfs_server_enabled is changed

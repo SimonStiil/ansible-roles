@@ -1,0 +1,7 @@
+---
+
+- name: Install nfs client packages
+  ansible.builtin.apt:
+    pkg:
+    - nfs-common
+    cache_valid_time: 3600

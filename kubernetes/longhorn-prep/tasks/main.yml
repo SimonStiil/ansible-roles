@@ -5,7 +5,7 @@
     pkg:
     - nfs-common
     - open-iscsi
-    update_cache: yes
+    cache_valid_time: 3600
   register: iscsi_install
 
 - name: Enable service open-iscsi

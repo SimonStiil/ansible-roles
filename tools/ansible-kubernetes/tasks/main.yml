@@ -3,7 +3,7 @@
   ansible.builtin.apt:
     pkg:
     - python3-pip
-    update_cache: yes
+    cache_valid_time: 3600
 - name: Install kubernetes and openshift packages
   ansible.builtin.pip:
     name:
