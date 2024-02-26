@@ -1,5 +1,9 @@
 ---
-   
+- name: Install cron packages
+  ansible.builtin.apt:
+    pkg:
+    - cron
+    cache_valid_time: 3600
 - name: Cron job to cleanup images on k3s node weekly"
   ansible.builtin.cron:
     name: "k3s rmi prune"
