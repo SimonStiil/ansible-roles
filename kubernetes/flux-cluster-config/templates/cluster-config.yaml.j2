@@ -1,0 +1,12 @@
+apiVersion: v1
+stringData:
+  topleveldomain: {{ fluxconfig_top_level_domain }}
+  clusterdomain: {{ fluxconfig_cluster_domain }}
+  ldapclusterdomain: {{ fluxconfig_ldap_cluster_domain }}
+  homedomain: {{ fluxconfig_home_domain }}
+  githubemail: {{ github_email }}
+kind: Secret
+metadata:
+  name: clusterconfig
+  namespace: flux-system
+type: Opaque

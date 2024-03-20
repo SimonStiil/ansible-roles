@@ -1,0 +1,3 @@
+---
+fluxconfig_top_level_domain: example.com
+fluxconfig_cluster_domain: cluster.example.com

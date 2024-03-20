@@ -1,0 +1,6 @@
+---
+- name: Create kibana encryption key Secret
+  kubernetes.core.k8s:
+    state: present
+    template:
+      path: 'cluster-config.yaml.j2'
