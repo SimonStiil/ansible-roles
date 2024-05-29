@@ -10,9 +10,9 @@
 
 - name: Create New VM for Templating
   command: >-
-    qm create {{ pve_vm_id }} --memory {{ proxmox_vm_template_memory }} --net0 virtio,bridge={{ proxmox_vm_bridge }} --name ubuntu-{{ ubuntu_version }}-{{ release_date }} --bios={{ proxmox_vm_bios }}
+    qm create {{ pve_vm_template_id }} --memory {{ proxmox_vm_template_memory }} --net0 virtio,bridge={{ proxmox_vm_bridge }} --name ubuntu-{{ ubuntu_version }}-{{ release_date }} --bios={{ proxmox_vm_bios }}
   args:
-    creates: /etc/pve/local/qemu-server/{{ pve_vm_id }}.conf
+    creates: /etc/pve/local/qemu-server/{{ pve_vm_template_id }}.conf
 
 - name: Download Ubuntu Cloud Image
   get_url:
@@ -25,29 +25,29 @@
 
 - name: Import the Downloaded Disk to {{ image_destination }}
   command: >-
-    qm importdisk {{ pve_vm_id }} {{image_folder }}ubuntu-{{ ubuntu_version }}-server-cloudimg-amd64.img {{ image_destination }}
+    qm importdisk {{ pve_vm_template_id }} {{image_folder }}ubuntu-{{ ubuntu_version }}-server-cloudimg-amd64.img {{ image_destination }}
 
 - name: Attach Image to VM 
   command: >-
-    qm set {{ pve_vm_id }} --scsihw virtio-scsi-pci --scsi0 {{ image_destination }}:vm-{{ pve_vm_id }}-disk-0
+    qm set {{ pve_vm_template_id }} --scsihw virtio-scsi-pci --scsi0 {{ image_destination }}:vm-{{ pve_vm_template_id }}-disk-0
 
 - name: Attach CloudInit CDROM to VM 
   command: >-
-    qm set {{ pve_vm_id }} --ide2 {{ image_destination }}:cloudinit
+    qm set {{ pve_vm_template_id }} --ide2 {{ image_destination }}:cloudinit
     
 - name: Attach EFIdisk to VM 
   command: >-
-    qm set {{ pve_vm_id }} --efidisk0 {{ image_destination }}:0,efitype=4m,pre-enrolled-keys=1,size=4M
+    qm set {{ pve_vm_template_id }} --efidisk0 {{ image_destination }}:0,efitype=4m,pre-enrolled-keys=1,size=4M
   when: proxmox_vm_bios == "ovmf"
 
 - name: Set Boot Drive
   command: >-
-    qm set {{ pve_vm_id }} --boot c --bootdisk scsi0
+    qm set {{ pve_vm_template_id }} --boot c --bootdisk scsi0
 
 - name: Set VM to use Serial Console
   command: >-
-    qm set {{ pve_vm_id }} --serial0 socket --vga serial0
+    qm set {{ pve_vm_template_id }} --serial0 socket --vga serial0
 
 - name: Change VM to be a Template
   command: >-
-    qm template {{ pve_vm_id }}
+    qm template {{ pve_vm_template_id }}

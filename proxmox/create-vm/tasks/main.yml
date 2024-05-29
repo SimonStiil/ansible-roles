@@ -1,0 +1,38 @@
+---
+- name: Check if VM Exists
+  stat:
+    path: "/etc/pve/local/qemu-server/{{ pve_vm_id }}.conf"
+  register: vm_config
+  
+- name: Create New VM for Templating
+  command: >-
+    qm clone {{ pve_vm_template_id }} {{ pve_vm_id }} --name {{ proxmox_vm_hostname }}
+  args:
+    creates: /etc/pve/local/qemu-server/{{ pve_vm_id }}.conf
+  when: >
+    not vm_config.stat.exists
+
+- name: Set CI Network Settings
+  command: >-
+    qm set {{ pve_vm_id }} --ipconfig0 ip={{ proxmox_vm_ip }}/{{ proxmox_vm_bitmask }},gw={{ proxmox_vm_gw }} --nameserver {{ proxmox_vm_nameserver }} --searchdomain {{ proxmox_vm_searchdomain }}
+
+- name: Create authorized_keys
+  ansible.builtin.template:
+    src: authorized_keys.j2
+    dest: "/tmp/{{ pve_vm_id }}.authorized_keys"
+    owner: root
+    group: root
+    mode: '0600'
+
+- name: Set CI authorized_keys
+  command: >-
+    qm set {{ pve_vm_id }} --sshkeys /tmp/{{ pve_vm_id }}.authorized_keys
+
+- name: Set VM Dimensions
+  command: >-
+    qm set {{ pve_vm_id }} --cores {{ proxmox_vm_cores }} --cpu cputype=host --memory {{ proxmox_vm_memory_size }} --balloon {{ proxmox_vm_balloon_size }}
+
+- name: Set VM Disk Size
+  command: >-
+    qm disk resize {{ pve_vm_id }} {{ proxmox_vm_disk_id }} {{ proxmox_vm_disk_size }}
+

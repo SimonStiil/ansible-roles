@@ -1,0 +1,15 @@
+---
+pve_vm_template_id: 9000 
+pve_vm_id: 200
+proxmox_vm_hostname: host
+proxmox_vm_ip: 192.168.1.10
+proxmox_vm_bitmask: 24
+proxmox_vm_gw: 192.168.1.1
+proxmox_vm_cores: 16
+proxmox_vm_memory_size: 24576
+proxmox_vm_balloon_size: 2048
+proxmox_vm_disk_id: scsi0
+proxmox_vm_disk_size: 128G
+proxmox_vm_boot_order: 1
+proxmox_vm_onboot: "true"
+
