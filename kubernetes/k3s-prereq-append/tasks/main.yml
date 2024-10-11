@@ -1,0 +1,42 @@
+---
+- name: Creates config directory
+  file:
+    path: "{{ rancher_config_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: 0775
+    recurse: yes
+  when: set_registry
+
+- name: Copy registry file
+  template:
+    src: "registries.yaml.j2"
+    dest: "{{ rancher_config_dir }}/registries.yaml"
+    owner: root
+    group: root
+    mode: 0644
+  when: set_registry
+  
+- name: Set Resolve Server
+  ansible.builtin.lineinfile:
+    path: /etc/systemd/resolved.conf
+    regexp: '^#DNS='
+    line: DNS=192.168.1.5
+  
+- name: Set Resolve Domains to all
+  ansible.builtin.lineinfile:
+    path: /etc/systemd/resolved.conf
+    regexp: '^#Domains='
+    line: Domains=~.
+    
+- name: Reload service systemd-resolved, in all cases
+  ansible.builtin.systemd:
+    name: systemd-resolved.service
+    state: restarted
+
+- name: Creating fake resolv.conf for cluster
+  copy:
+    dest: "/etc/resolv.conf.fake"
+    content: |
+      nameserver 192.168.1.5

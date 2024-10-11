@@ -1,0 +1,153 @@
+---
+- name: Check if containerd binary exists.
+  stat:
+    path: "{{ ctr_path }}"
+  register: containerd_check
+  
+- name: containerd golang version.
+  command: "{{ ctr_path }} --version"
+  failed_when: false
+  changed_when: false
+  register: containerd_existing_version
+  
+- name: Modprobe
+  lineinfile:
+    path: "/etc/modules"
+    line: "{{ item }}"
+    create: yes
+    state: present
+  loop: "{{ modprobe_modules }}"
+
+- name: Add br_netfilter module
+  community.general.modprobe:
+    name: "{{ item }}"
+    state: present
+  loop: "{{ modprobe_modules }}"
+
+- name: Set ip forwarding
+  sysctl:
+      name: "{{ item }}"
+      value: 1
+      sysctl_set: yes
+      state: present
+      reload: yes
+  loop:
+    - 'net.ipv4.ip_forward'
+    - 'net.bridge.bridge-nf-call-iptables'
+
+- name: Setting architecture Arm64
+  ansible.builtin.set_fact: 
+    arch: arm64
+  when: ansible_facts['machine'] == "aarch64"
+
+- name: Setting architecture Amd64
+  ansible.builtin.set_fact: 
+    arch: amd64
+  when: ansible_facts['machine'] == "x86_64"
+  
+# - name: Show facts available on the system
+  # ansible.builtin.debug:
+    # var: ansible_facts
+  
+- name: 'Check if architecture defined' 
+  fail: msg="Please enter correct Params"
+  when: arch is not defined
+
+- name: Download containerd binary
+  get_url:
+    url: https://github.com/containerd/containerd/releases/download/v{{ containerd_version }}/containerd-{{ containerd_version }}-linux-{{ arch }}.tar.gz
+    dest: /tmp
+    owner: root
+    group: root
+    mode: 0755
+  register: containerd_download
+  when: >
+    not containerd_check.stat.exists
+    or containerd_version not in containerd_existing_version.stdout
+
+- name: Unarchive containerd
+  ansible.builtin.unarchive:
+    src: /tmp/containerd-{{ containerd_version }}-linux-{{ arch }}.tar.gz
+    dest: /usr/local
+    remote_src: yes
+  when: containerd_download is changed
+
+- name: Creates config directory
+  file:
+    path: "/etc/containerd/"
+    state: directory
+    owner: root
+    group: root
+    mode: 0775
+    recurse: yes
+
+- name: Copy config.toml file
+  template:
+    src: "config.toml.j2"
+    dest: "/etc/containerd/config.toml"
+    owner: root
+    group: root
+    mode: 0755
+  register: config_toml
+
+- name: Check if containerd binary exists.
+  stat:
+    path: "{{ runc_path }}"
+  register: runc_check
+  
+- name: containerd runc version.
+  command: "{{ runc_path }} --version"
+  failed_when: false
+  changed_when: false
+  register: runc_existing_version
+
+- name: Download runc binary
+  get_url:
+    url: https://github.com/opencontainers/runc/releases/download/v{{ runc_version }}/runc.{{ arch }}
+    dest: /tmp
+    owner: root
+    group: root
+    mode: 0755
+  register: runc_download
+  when: >
+    not runc_check.stat.exists
+    or runc_version not in runc_existing_version.stdout
+
+- name: Copy runc binary into place.
+  copy:
+    src: "/tmp/runc.{{ arch }}"
+    dest: "{{ runc_path }}"
+    mode: 0755
+    remote_src: true
+  become: true
+  when: runc_download is changed
+
+- name: Download containerd service file
+  get_url:
+    url: https://raw.githubusercontent.com/containerd/containerd/main/containerd.service
+    dest: /tmp
+    owner: root
+    group: root
+    mode: 0755
+  register: containerd_service_download
+
+- name: Copy containerd.service into place.
+  copy:
+    src: "/tmp/containerd.service"
+    dest: "/usr/lib/systemd/system/"
+    mode: 0644
+    remote_src: true
+  become: true
+  when: containerd_service_download is changed
+
+- name: Enable service containerd and ensure it is not masked
+  ansible.builtin.systemd_service:
+    name: containerd
+    enabled: true
+    state: started
+    daemon_reload: true
+    masked: no
+  when: >
+    containerd_service_download is changed 
+    or containerd_download is changed
+  
