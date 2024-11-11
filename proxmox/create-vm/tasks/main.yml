@@ -12,9 +12,20 @@
   when: >
     not vm_config.stat.exists
 
-- name: Set CI Network Settings
+- name: Get VM Network Settings
+  command: >-
+    qm config {{ pve_vm_id }}
+  register: result
+  when: proxmox_vm_vlan is defined
+
+- name: Set Network Settings
+  command: "qm set {{ pve_vm_id }} --net0 {{ result.stdout | regex_search('virtio=([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})')}},bridge={{ proxmox_vm_bridge }},tag={{ proxmox_vm_vlan }}"
+  when: proxmox_vm_vlan is defined
+
+- name: Set VM IP Settings
   command: >-
     qm set {{ pve_vm_id }} --ipconfig0 ip={{ proxmox_vm_ip }}/{{ proxmox_vm_bitmask }},gw={{ proxmox_vm_gw }} --nameserver {{ proxmox_vm_nameserver }} --searchdomain {{ proxmox_vm_searchdomain }}
+  when: proxmox_vm_ip_static == true
 
 - name: Create authorized_keys
   ansible.builtin.template:
@@ -24,7 +35,7 @@
     group: root
     mode: '0600'
 
-- name: Set CI authorized_keys
+- name: Set VM authorized_keys
   command: >-
     qm set {{ pve_vm_id }} --sshkeys /tmp/{{ pve_vm_id }}.authorized_keys
 

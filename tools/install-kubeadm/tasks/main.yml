@@ -36,3 +36,11 @@
     fstype: swap
     state: absent
   loop: ["none", "swap"]
+  
+- name: Run installer
+  ansible.builtin.shell:
+    cmd: crictl config --set runtime-endpoint=unix:///run/containerd/containerd.sock
+    chdir: /tmp/
+    creates: "/etc/crictl.yaml"
+  become: true
+  when: not flux_download is skipped

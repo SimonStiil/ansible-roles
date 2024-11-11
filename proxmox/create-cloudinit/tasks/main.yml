@@ -47,7 +47,7 @@
 - name: Set VM to use Serial Console
   command: >-
     qm set {{ pve_vm_template_id }} --serial0 socket --vga serial0
-
+  when: pve_vm_template_serial == true
 - name: Change VM to be a Template
   command: >-
     qm template {{ pve_vm_template_id }}
