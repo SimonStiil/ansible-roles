@@ -4,10 +4,19 @@
     pkg:
     - python3-pip
     cache_valid_time: 3600
+- name: Install pip packages
+  ansible.builtin.apt:
+    pkg:
+    - python3-kubernetes
+    - python3-openshift
+    cache_valid_time: 3600
+  ignore_errors: true
+  register: install_apt
 - name: Install kubernetes and openshift packages
   ansible.builtin.pip:
     name:
     - kubernetes
     - openshift
     executable: pip3
+  when: install_apt.failed == true
     

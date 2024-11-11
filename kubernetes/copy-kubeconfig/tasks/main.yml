@@ -6,7 +6,10 @@
     state: directory
     owner: root
     mode: "u=rwx,g=rx,o="
-
+- name: Check if k3s exists
+  stat:
+    path: "/etc/rancher/k3s/k3s.yaml"
+  register: k3s_check
 - name: Copy config file to user home directory
   copy:
     src: /etc/rancher/k3s/k3s.yaml
@@ -14,3 +17,17 @@
     remote_src: yes
     owner: root
     mode: "u=rw,g=,o="
+  when: k3s_check.stat.exists
+- name: Check if rke2 exists
+  stat:
+    path: "/etc/rancher/rke2/rke2.yaml"
+  register: rke2_check
+  when: k3s_check.stat.exists == false
+- name: Copy config file to user home directory
+  copy:
+    src: /etc/rancher/rke2/rke2.yaml
+    dest: /root/.kube/config
+    remote_src: yes
+    owner: root
+    mode: "u=rw,g=,o="
+  when: rke2_check.stat.exists and k3s_check.stat.exists == false
