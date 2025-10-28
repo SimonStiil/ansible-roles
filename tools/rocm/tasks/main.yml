@@ -1,0 +1,51 @@
+---
+- name: Download AMD GPU install package
+  ansible.builtin.get_url:
+    url: "{{ amdgpu_install_base_url }}/amdgpu-install_{{ amdgpu_install_version }}_all.deb"
+    dest: "{{ amdgpu_install_deb_path }}/amdgpu-install_{{ amdgpu_install_version }}_all.deb"
+    mode: '0644'
+
+- name: Install AMD GPU install package
+  ansible.builtin.apt:
+    deb: "{{ amdgpu_install_deb_path }}/amdgpu-install_{{ amdgpu_install_version }}_all.deb"
+    state: present
+
+- name: Update apt cache
+  ansible.builtin.apt:
+    update_cache: yes
+
+- name: Install Python dependencies
+  ansible.builtin.apt:
+    name:
+      - python3-setuptools
+      - python3-wheel
+    state: present
+
+- name: Add user to render and video groups
+  ansible.builtin.user:
+    name: "{{ ansible_user_id }}"
+    groups: "{{ rocm_user_groups }}"
+    append: yes
+
+- name: Install ROCm
+  ansible.builtin.apt:
+    name: rocm
+    state: present
+
+- name: Install kernel headers and modules
+  ansible.builtin.apt:
+    name:
+      - linux-generic
+      - amdgpu-dkms
+    state: present
+
+- name: Check if system requires reboot
+  ansible.builtin.stat:
+    path: /var/run/reboot-required
+  register: reboot_required_file
+
+- name: Reboot system if required
+  ansible.builtin.reboot:
+    msg: "Rebooting system after ROCm installation"
+    reboot_timeout: 600
+  when: reboot_required_file.stat.exists

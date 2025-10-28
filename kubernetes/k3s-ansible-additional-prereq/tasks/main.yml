@@ -22,7 +22,7 @@
   ansible.builtin.lineinfile:
     path: /etc/systemd/resolved.conf
     regexp: '^#DNS='
-    line: DNS=192.168.1.5
+    line: "DNS={{ dns_server }}"
   
 - name: Set Resolve Domains to all
   ansible.builtin.lineinfile:
@@ -39,4 +39,4 @@
   copy:
     dest: "/etc/resolv.conf.fake"
     content: |
-      nameserver 192.168.1.5
+      nameserver {{ dns_server }}

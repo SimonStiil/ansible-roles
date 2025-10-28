@@ -1,0 +1,19 @@
+---
+galaxy_info:
+  author: Simon
+  description: Install AMD ROCm on Ubuntu
+  company: Stiil
+  license: MIT
+  min_ansible_version: "2.9"
+  platforms:
+    - name: Ubuntu
+      versions:
+        - noble
+        - jammy
+  galaxy_tags:
+    - amd
+    - rocm
+    - gpu
+
+dependencies: []
+

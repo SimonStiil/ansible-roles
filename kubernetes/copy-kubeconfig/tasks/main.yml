@@ -30,4 +30,4 @@
     remote_src: yes
     owner: root
     mode: "u=rw,g=,o="
-  when: rke2_check.stat.exists and k3s_check.stat.exists == false
+  when: k3s_check.stat.exists and k3s_check.stat.exists == false

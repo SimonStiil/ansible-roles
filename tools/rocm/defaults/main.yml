@@ -1,0 +1,7 @@
+---
+amdgpu_install_version: "7.0.2.70002-1"
+amdgpu_install_base_url: "https://repo.radeon.com/amdgpu-install/7.0.2/ubuntu/noble"
+amdgpu_install_deb_path: "/tmp"
+rocm_user_groups:
+  - render
+  - video

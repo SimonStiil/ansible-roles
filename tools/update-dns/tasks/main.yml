@@ -1,0 +1,72 @@
+---
+- name: Ensure required variables are defined
+  fail:
+    msg: "Required variable {{ item }} is not defined"
+  when: vars[item] is not defined
+  loop:
+    - dns_update_server
+    - dns_update_name
+
+- name: Get host primary IP address
+  set_fact:
+    host_ip: "{{ ansible_default_ipv4.address }}"
+
+- name: Create FQDN
+  set_fact:
+    host_fqdn: "{{ ansible_hostname }}.{{ dns_update_name }}"
+
+- name: Calculate reverse DNS zone from IP
+  set_fact:
+    reverse_zone: "{{ host_ip.split('.')[:3] | reverse | join('.') }}.in-addr.arpa"
+    reverse_record: "{{ host_ip.split('.')[3] }}"
+
+- name: Display DNS information
+  debug:
+    msg: |
+      DNS Server: {{ dns_update_server }}
+      Forward record: {{ host_fqdn }} -> {{ host_ip }}
+      Reverse zone: {{ reverse_zone }}
+      Reverse record: {{ reverse_record }}.{{ reverse_zone }} -> {{ host_fqdn }}
+  when: dns_update_debug
+
+- name: Create forward DNS record (A record)
+  nsupdate:
+    server: "{{ dns_update_server }}"
+    zone: "{{ dns_update_name }}"
+    record: "{{ ansible_hostname }}"
+    type: "A"
+    value: "{{ host_ip }}"
+    state: present
+  delegate_to: localhost
+
+- name: Create reverse DNS record (PTR record)
+  nsupdate:
+    server: "{{ dns_update_server }}"
+    zone: "{{ reverse_zone }}"
+    record: "{{ reverse_record }}"
+    type: "PTR"
+    value: "{{ host_fqdn }}."
+    state: present
+  delegate_to: localhost
+- name: verify dns
+  when: dns_update_debug
+  block:
+  - name: Verify forward DNS resolution
+    command: nslookup {{ host_fqdn }} {{ dns_update_server }}
+    register: forward_lookup
+    changed_when: false
+    failed_when: false
+    delegate_to: localhost
+
+  - name: Verify reverse DNS resolution
+    command: nslookup {{ host_ip }} {{ dns_update_server }}
+    register: reverse_lookup
+    changed_when: false
+    failed_when: false
+    delegate_to: localhost
+
+  - name: Display verification results
+    debug:
+      msg: |
+        Forward lookup result: {{ 'SUCCESS' if forward_lookup.rc == 0 else 'FAILED' }}
+        Reverse lookup result: {{ 'SUCCESS' if reverse_lookup.rc == 0 else 'FAILED' }}

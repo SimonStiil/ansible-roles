@@ -1,0 +1,4 @@
+---
+dns_update_server: "192.168.10.15"
+dns_update_name: "stiil.home"
+dns_update_debug: false
