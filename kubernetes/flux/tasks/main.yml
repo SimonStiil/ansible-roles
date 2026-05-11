@@ -1,33 +1,69 @@
 ---
-- name: Get an existing Service object
-  kubernetes.core.k8s_info:
-    api_version: kustomize.toolkit.fluxcd.io/v1
-    kind: Kustomization
-    name: flux-system
-    namespace: flux-system
-  register: flux_system_kustomize
-  
-- name: Print return information from the previous task
-  ansible.builtin.debug:
-    var: flux_system_kustomize
-    verbosity: 2
-    
-- name: Get an existing Service object
-  kubernetes.core.k8s_info:
-    api_version: source.toolkit.fluxcd.io/v1
-    kind: GitRepository
-    name: flux-system
-    namespace: flux-system
-  register: flux_system_gitrepository
+- name: Flux bootstrap
+  delegate_to: "{{ 'localhost' if delegate_local else inventory_hostname }}"
+  block:
+    - name: Set kubeconfig flag
+      ansible.builtin.set_fact:
+        _flux_kubeconfig_flag: "{{ '--kubeconfig=' + kubeconfig_path if kubeconfig_path is defined else '' }}"
 
-- name: flux bootstrap
-  ansible.builtin.shell:
-    cmd: flux bootstrap github --reconcile --owner={{ github_organization }} --repository={{ github_flux_repository }} --private={{ github_private }} --personal={{ github_personal }} --path={{ github_flux_base }}
-  register: flux_bootstrap
-  environment:
-    GITHUB_TOKEN: "{{ github_token_flux }}"
-  when: >
-    (not flux_system_kustomize.api_found or
-    not flux_system_kustomize.resources) and
-    (not flux_system_gitrepository.api_found or
-    not flux_system_gitrepository.resources)
+    - name: Get flux-system Kustomization
+      kubernetes.core.k8s_info:
+        api_version: kustomize.toolkit.fluxcd.io/v1
+        kind: Kustomization
+        name: flux-system
+        namespace: flux-system
+        kubeconfig: "{{ kubeconfig_path | default(omit) }}"
+      register: flux_system_kustomize
+
+    - name: Print flux-system Kustomization
+      ansible.builtin.debug:
+        var: flux_system_kustomize
+        verbosity: 2
+
+    - name: Get flux-system GitRepository
+      kubernetes.core.k8s_info:
+        api_version: source.toolkit.fluxcd.io/v1
+        kind: GitRepository
+        name: flux-system
+        namespace: flux-system
+        kubeconfig: "{{ kubeconfig_path | default(omit) }}"
+      register: flux_system_gitrepository
+
+    - name: flux bootstrap gitea
+      ansible.builtin.shell:
+        cmd: >
+          flux bootstrap gitea --reconcile
+          {{ _flux_kubeconfig_flag }}
+          --hostname={{ gitea_hostname }}
+          --owner={{ gitea_organization }}
+          --repository={{ flux_repository }}
+          --private={{ flux_private }}
+          --personal={{ flux_personal }}
+          --path={{ flux_base }}
+      environment:
+        GITEA_TOKEN: "{{ gitea_token_flux }}"
+      when: >
+        gitea_hostname is defined and
+        (not flux_system_kustomize.api_found or
+        not flux_system_kustomize.resources) and
+        (not flux_system_gitrepository.api_found or
+        not flux_system_gitrepository.resources)
+
+    - name: flux bootstrap github
+      ansible.builtin.shell:
+        cmd: >
+          flux bootstrap github --reconcile
+          {{ _flux_kubeconfig_flag }}
+          --owner={{ github_organization }}
+          --repository={{ github_flux_repository | default(flux_repository) }}
+          --private={{ github_private | default(flux_private) }}
+          --personal={{ github_personal | default(flux_personal) }}
+          --path={{ github_flux_base | default(flux_base) }}
+      environment:
+        GITHUB_TOKEN: "{{ github_token_flux }}"
+      when: >
+        gitea_hostname is not defined and
+        (not flux_system_kustomize.api_found or
+        not flux_system_kustomize.resources) and
+        (not flux_system_gitrepository.api_found or
+        not flux_system_gitrepository.resources)

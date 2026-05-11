@@ -1,6 +1,8 @@
 ---
 - name: Create kibana encryption key Secret
   kubernetes.core.k8s:
+    kubeconfig: "{{ kubeconfig_path | default(omit) }}"
     state: present
     template:
       path: 'cluster-config.yaml.j2'
+  delegate_to: "{{ 'localhost' if delegate_local else inventory_hostname }}"

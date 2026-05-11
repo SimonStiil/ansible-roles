@@ -1,6 +1,18 @@
----
+# Shared defaults (used by both providers unless overridden)
+flux_repository: myFluxRepo
+flux_base: flux-base
+flux_private: false
+flux_personal: true
+
+# Provider selection: set gitea_hostname to use Gitea (takes precedence)
+# gitea_hostname: git.example.com
+# gitea_organization: myORG
+
+# GitHub (used when gitea_hostname is not defined)
 github_organization: myORG
-github_flux_repository: myFluxRepo
-github_flux_base: flux-base
-github_private: false 
-github_personal: true 
+
+# Legacy per-provider overrides (backwards compat - prefer shared vars above)
+# github_flux_repository:
+# github_flux_base:
+# github_private:
+# github_personal:
